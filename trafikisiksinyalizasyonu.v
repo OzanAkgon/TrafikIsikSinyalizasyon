@@ -1,52 +1,32 @@
-module traffic_isik_sinyalizasyonu(
-  input clk,
-  output reg kirmizi_led,
-  output reg yesil_led,
-  output reg mavi_led
-);
-
-reg [3:0] durum = 0;        // 4 bitlik bir durum değişkeni tanımlıyoruz
-reg [25:0] counter = 0;     // 26 bitlik bir sayaç tanımlıyoruz
-
-parameter KIRMIZI_TIME = 10;    // Kırmızı ışığın süresi 
-parameter MAVI_TIME = 2;    // Mavi ışığın süresi
-parameter YESIL_TIME = 5;   // Yeşil ışığın süresi 
-
-always @(posedge clk) begin
-  counter <= counter + 1;   // her tetiklemede sayaç 1 artırılır
-end
-
-
-always @(posedge clk) begin
-  case(durum)
-    0: begin    // Kırmızı ışık durumu
-      kirmizi_led <= 1;
-      yesil_led <= 0;
-      mavi_led <= 0;
-      if (counter >= (KIRMIZI_TIME * 1000000000) / 10) begin //sn cinsine çevirme
-        durum <= 1;
-        counter <= 0;
-      end
+module trafikisiksinyalizasyonu(input wire clk,  // saat sinyali
+                      output reg red,  // kırmızı ışık
+                      output reg blue, // mavi ışık
+                      output reg green // yeşil ışık
+                     );
+                     
+    reg [25:0] timer;
+    
+    always @(posedge clk) begin
+        if (timer >= 0 && timer < 27000000) begin 
+            red <= 0;
+            blue <= 1;
+            green <= 1;
+            timer <= timer + 1;
+        end else if (timer >= 27000000 && timer < 32400000) begin 
+            red <= 1;
+            blue <= 0;
+            green <= 1;
+            timer <= timer + 1;
+        end else if (timer >= 32400000 && timer < 59400000) begin 
+            red <= 1;
+            blue <= 1;
+            green <= 0;
+            timer <= timer + 1;
+        end else begin 
+            red <= 0;
+            blue <= 0;
+            green <= 0;
+            timer <= 0;
+        end
     end
-    1: begin    // Mavi ışık durumu
-      kirmizi_led <= 0;
-      yesil_led <= 0;
-      mavi_led <= 1;
-      if (counter >= (MAVI_TIME * 1000000000) / 10) begin //sn cinsine çevirme
-        durum <= 2;
-        counter <= 0;
-      end
-    end
-    2: begin    // Yeşil ışık durumu
-      kirmizi_led <= 0;
-      yesil_led <= 1;
-      mavi_led <= 0;
-      if (counter >= (YESIL_TIME * 1000000000) / 10) begin //sn cinsine çevirme
-        durum <= 0;
-        counter <= 0;
-      end
-    end
-  endcase
-end
-
 endmodule
